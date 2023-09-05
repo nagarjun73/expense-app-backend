@@ -104,6 +104,58 @@ app.delete('/api/categories/:id', (req, res)=>{
 
 // EXPENSES REQ
 
+app.get('/api/expenses',(req, res)=>{
+  Expense.find()
+    .then((expenses)=>{
+      res.json(expenses)
+    })
+    .catch((err)=>{
+      res.json(err)
+    })
+})
+
+app.post('/api/expenses', (req, res)=>{
+  const body = req.body
+  const exp1 = new Expense()
+  exp1.title = body.title
+  exp1.description = body.description
+  exp1.amount = body.amount
+  exp1.expenseDate = body.expenseDate
+  exp1.categoryId = body.categoryId
+
+  exp1.save()
+    .then((exp)=>{
+      res.json(exp)
+    })
+    .catch((err)=>{
+      res.json(err)
+    })
+})
+
+app.put('/api/expenses/:id',(req, res)=>{
+  const id = req.params.id
+  const body = req.body
+
+  Expense.findByIdAndUpdate(id, body, {runValidators:true, new:true})
+    .then((exp)=>{
+      res.json(exp)
+    })
+    .catch((err)=>{
+      res.json(err)
+    })
+})
+
+app.delete('/api/expenses/:id', (req, res)=>{
+  const id = req.params.id
+  Expense.findByIdAndDelete(id)
+    .then((exp)=>{
+      res.json(exp)
+    })
+    .catch((err)=>{
+      res.json(err)
+    })
+})
+
 app.listen(port, ()=>{
   console.log('server running on port', port);
 })
