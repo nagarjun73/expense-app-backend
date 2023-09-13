@@ -3,7 +3,7 @@ const expController = {}
 
 expController.getExp = async function (req, res) {
   try {
-    const exp = Expense.find()
+    const exp = await Expense.find()
     res.json(exp)
   } catch (e) {
     res.json(e)
