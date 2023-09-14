@@ -1,161 +1,34 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const mongoose = require('mongoose')
-const port = 3077
+const { checkSchema } = require('express-validator')
 
+const port = process.env.PORT || 3077
+const configureDB = require('./config/db')
+const catController = require('./app/controller/category-controller')
+const expController = require('./app/controller/expenses-controller')
+const catValidationSchema = require('./app/helpers/catValidationSchema')
+const expValidationSchema = require('./app/helpers/expValidationSchema')
 const app = express()
 
 app.use(express.json())
 app.use(cors())
 
 //Connect to mongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/expenses-app-fullstack')
-  .then(()=>{
-    console.log('Connected to DB');
-  })
-  .catch((e)=>{
-    console.log('error connecting to db', e);
-  })
-
-const {Schema, model} = mongoose
-
-const categorySchema = new Schema({
-  name:{
-    type:String,
-    required:true
-  }
-})
-
-const Category = model("Category", categorySchema)
-
-const expenseSchema = new Schema({
-  title:{
-    type:String,
-    required:true
-  },
-  description:{
-    type:String,
-  },
-  amount:{
-    type:Number,
-    required:true
-  },
-  expenseDate:{
-    type:Date,
-    default:new Date()
-  },
-  categoryId:{
-    type:Schema.Types.ObjectId,
-    required:true,
-    ref:'Category'
-  }
-})
-
-const Expense = model('expense', expenseSchema)
-
+configureDB()
 
 //CATEGORIES REQ
-app.get('/api/categories', (req, res)=>{
-  Category.find()
-    .then((categories)=>{
-      res.json(categories)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
-
-app.post('/api/categories', (req, res)=>{
-  const body = req.body
-  const cat1 = new Category()
-  cat1.name = body.name
-  cat1.save()
-    .then((cat)=>{
-      res.json(cat)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
-
-app.put('/api/categories/:id',(req, res)=>{
-  const id = req.params.id
-  const body = req.body
-
-  Category.findByIdAndUpdate(id, body, {runValidators:true, new:true})
-  .then((cat)=>{
-    res.json(cat)
-  })
-  .catch((err)=>{
-    res.json(err)
-  })
-})
-
-app.delete('/api/categories/:id', (req, res)=>{
-  const id = req.params.id
-  Category.findByIdAndDelete(id)
-    .then((cat)=>{
-      res.json(cat)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
+app.get('/api/categories', catController.getCats)
+app.post('/api/categories', checkSchema(catValidationSchema), catController.addCats)
+app.put('/api/categories/:id', checkSchema(catValidationSchema), catController.editCat)
+app.delete('/api/categories/:id', catController.deleteCat)
 
 // EXPENSES REQ
+app.get('/api/expenses', expController.getExp)
+app.post('/api/expenses', checkSchema(expValidationSchema), expController.addExp)
+app.put('/api/expenses/:id', checkSchema(expValidationSchema), expController.editExp)
+app.delete('/api/expenses/:id', expController.deleteExp)
 
-app.get('/api/expenses',(req, res)=>{
-  Expense.find()
-    .then((expenses)=>{
-      res.json(expenses)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
-
-app.post('/api/expenses', (req, res)=>{
-  const body = req.body
-  const exp1 = new Expense()
-  exp1.title = body.title
-  exp1.description = body.description
-  exp1.amount = body.amount
-  exp1.expenseDate = body.expenseDate
-  exp1.categoryId = body.categoryId
-
-  exp1.save()
-    .then((exp)=>{
-      res.json(exp)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
-
-app.put('/api/expenses/:id',(req, res)=>{
-  const id = req.params.id
-  const body = req.body
-
-  Expense.findByIdAndUpdate(id, body, {runValidators:true, new:true})
-    .then((exp)=>{
-      res.json(exp)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
-
-app.delete('/api/expenses/:id', (req, res)=>{
-  const id = req.params.id
-  Expense.findByIdAndDelete(id)
-    .then((exp)=>{
-      res.json(exp)
-    })
-    .catch((err)=>{
-      res.json(err)
-    })
-})
-
-app.listen(port, ()=>{
+app.listen(port, () => {
   console.log('server running on port', port);
 })
