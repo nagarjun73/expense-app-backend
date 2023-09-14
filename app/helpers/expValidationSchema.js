@@ -26,6 +26,7 @@ const expValidationSchema = {
       errorMessage: "Date should not be empty"
     },
     isDate: {
+      options:{delimiters:['/', '-'}
       errorMessage: "Date should be in correct format"
     }
   },
