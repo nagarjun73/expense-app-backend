@@ -20,6 +20,7 @@ catController.addCats = async function (req, res) {
       const body = req.body
       const cat1 = new Category()
       cat1.name = body.name
+      cat1.color = body.color
       await cat1.save()
       res.json(cat1)
     }

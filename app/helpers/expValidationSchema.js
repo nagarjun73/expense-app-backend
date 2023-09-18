@@ -2,10 +2,6 @@ const expValidationSchema = {
   title: {
     notEmpty: {
       errorMessage: "title should not be empty"
-    },
-    isLength: {
-      options: { min: 3 },
-      errorMessage: "title should be minimum 3 characters"
     }
   },
   description: {
@@ -26,7 +22,7 @@ const expValidationSchema = {
       errorMessage: "Date should not be empty"
     },
     isDate: {
-      options:{delimiters:['/', '-'}
+      options:{delimiters:['/', '-']},
       errorMessage: "Date should be in correct format"
     }
   },
